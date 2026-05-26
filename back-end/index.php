@@ -47,7 +47,7 @@ if ($handler === null) {
 
 switch ($handler) {
     case 'home': {
-        $articles = articles_latest_published(6);
+        try { $articles = articles_latest_published(6); } catch (Throwable) { $articles = []; }
         render('home', [
             'pageTitle' => 'Início',
             'articles'  => $articles,
@@ -58,10 +58,10 @@ switch ($handler) {
         break;
     }
     case 'articles': {
-        $articles = articles_list_published();
+        try { $articles = articles_list_published(); } catch (Throwable) { $articles = []; }
         render('articles', [
             'pageTitle' => 'Artigos',
-            'articles' => $articles,
+            'articles'  => $articles,
         ]);
         break;
     }
@@ -69,32 +69,38 @@ switch ($handler) {
         $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if (!$id) {
             http_response_code(404);
+            try { $arts = articles_list_published(); } catch (Throwable) { $arts = []; }
             render('articles', [
                 'pageTitle' => 'Artigos',
-                'articles' => articles_list_published(),
-                'flash' => ['type' => 'warning', 'message' => 'Artigo inválido.'],
+                'articles'  => $arts,
+                'flash'     => ['type' => 'warning', 'message' => 'Artigo inválido.'],
             ]);
             break;
         }
-        $article = articles_get_published_by_id($id);
+        try { $article = articles_get_published_by_id($id); } catch (Throwable) { $article = null; }
         if ($article === null) {
             http_response_code(404);
+            try { $arts = articles_list_published(); } catch (Throwable) { $arts = []; }
             render('articles', [
                 'pageTitle' => 'Artigos',
-                'articles' => articles_list_published(),
-                'flash' => ['type' => 'warning', 'message' => 'Artigo não encontrado.'],
+                'articles'  => $arts,
+                'flash'     => ['type' => 'warning', 'message' => 'Artigo não encontrado.'],
             ]);
             break;
         }
         render('article', [
             'pageTitle' => $article['title'],
-            'article' => $article,
+            'article'   => $article,
         ]);
         break;
     }
     case 'api_articles': {
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(articles_list_published(), JSON_UNESCAPED_UNICODE);
+        try {
+            echo json_encode(articles_list_published(), JSON_UNESCAPED_UNICODE);
+        } catch (Throwable) {
+            echo json_encode([]);
+        }
         break;
     }
     case 'api_article': {
