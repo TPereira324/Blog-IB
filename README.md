@@ -23,4 +23,7 @@ O sistema permite criar, visualizar e organizar publicações de maneira intuiti
 - JavaScript
 - PHP
 - MySQL
-## 
+
+## Equipa
+-Feliciano Barata
+-Taha-Wur Pereira
