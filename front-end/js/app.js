@@ -1,141 +1,73 @@
-﻿const apiBase = '/api';
+﻿// ─── Constants ────────────────────────────────────────────────────────────────
+const ARTICLES_KEY = 'journal_articles';
+const AUTH_KEY = 'journal_auth';
+const DEMO_EMAIL = 'admin@thejournal.com';
+const DEMO_PASS = 'journal2026';
 
-async function apiGet(path) {
-    const response = await fetch(`${apiBase}${path}`, {
-        credentials: 'same-origin',
-        headers: { 'Accept': 'application/json' },
-    });
-    if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || 'Erro ao carregar dados.');
-    }
-    return response.json();
+// ─── Storage ──────────────────────────────────────────────────────────────────
+function getArticles() {
+  try { return JSON.parse(localStorage.getItem(ARTICLES_KEY) || '[]'); }
+  catch { return []; }
 }
 
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+function saveArticles(articles) {
+  localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
 }
 
-function formatDate(value) {
-    const date = new Date(value);
-    return date.toLocaleDateString('pt-PT', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+function isAdmin() {
+  return localStorage.getItem(AUTH_KEY) === 'true';
 }
 
-function getQueryParam(name) {
-    return new URLSearchParams(window.location.search).get(name) || '';
+function requireAdmin() {
+  if (!isAdmin()) window.location.href = 'admin-login.html';
 }
 
-function showEmpty(message) {
-    const emptyBox = document.getElementById('article-empty');
-    if (!emptyBox) return;
-    emptyBox.textContent = message;
-    emptyBox.classList.remove('d-none');
+function adminLogout() {
+  localStorage.removeItem(AUTH_KEY);
+  window.location.href = 'index.html';
 }
 
-function createArticleCard(article) {
-    return `
-        <div class="col-12 col-md-6 col-xl-4">
-            <div class="card p-4 h-100 article-card animate-fade-in">
-                <div class="mb-3 text-muted small">${formatDate(article.published_at)}</div>
-                <h3 class="h5 mb-3">${escapeHtml(article.title)}</h3>
-                <p class="text-muted mb-4">${escapeHtml(article.excerpt)}</p>
-                <a class="stretched-link text-decoration-none fw-semibold" href="article.html?id=${article.id}">Ler artigo</a>
-            </div>
-        </div>
-    `;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-async function initHome() {
-    try {
-        const articles = await apiGet('/api/articles');
-        const list = document.getElementById('article-list');
-        if (!list) return;
-        if (!Array.isArray(articles) || articles.length === 0) {
-            showEmpty('Ainda não existem artigos publicados. Volte mais tarde.');
-            return;
-        }
-        list.innerHTML = articles.slice(0, 6).map(createArticleCard).join('');
-    } catch (error) {
-        showEmpty(error.message);
-    }
+function readTime(text) {
+  const words = text.trim().split(/\s+/).length;
+  const mins = Math.max(1, Math.round(words / 200));
+  return `${mins} min read`;
 }
 
-async function initArticles() {
-    try {
-        const articles = await apiGet('/api/articles');
-        const list = document.getElementById('article-list');
-        if (!list) return;
-        if (!Array.isArray(articles) || articles.length === 0) {
-            showEmpty('Ainda não existem artigos publicados. Volte mais tarde.');
-            return;
-        }
-        list.innerHTML = articles.map(createArticleCard).join('');
-    } catch (error) {
-        showEmpty(error.message);
-    }
+function excerpt(text, len = 160) {
+  const plain = text.replace(/<[^>]*>/g, '');
+  return plain.length > len ? plain.slice(0, len).trimEnd() + '…' : plain;
 }
 
-async function initArticle() {
-    const id = getQueryParam('id');
-    const errorBox = document.getElementById('article-error');
-    if (!id) {
-        if (errorBox) {
-            errorBox.textContent = 'ID do artigo não fornecido.';
-            errorBox.classList.remove('d-none');
-        }
-        return;
-    }
-
-    try {
-        const article = await apiGet(`/api/article?id=${encodeURIComponent(id)}`);
-        const detail = document.getElementById('article-detail');
-        if (!detail) return;
-        detail.innerHTML = `
-            <div class="mb-4"><a class="link-underline" href="articles.html">← Voltar aos artigos</a></div>
-            <h1 class="mb-3">${escapeHtml(article.title)}</h1>
-            <div class="text-muted mb-4">${formatDate(article.published_at)}</div>
-            <div class="article-body text-break fs-5 lh-lg">${article.content}</div>
-        `;
-    } catch (error) {
-        if (errorBox) {
-            errorBox.textContent = error.message;
-            errorBox.classList.remove('d-none');
-        }
-    }
+function articleCardHTML(art, i) {
+  return `
+    <div class="article-card" onclick="window.location.href='article.html?id=${i}'">
+      <div class="article-meta">
+        <span class="article-date">${formatDate(art.date)}</span>
+        ${art.tag ? `<span class="article-tag">${art.tag}</span>` : ''}
+      </div>
+      <h3 class="article-title">${art.title}</h3>
+      <p class="article-excerpt">${excerpt(art.body)}</p>
+    </div>`;
 }
 
-async function initLogin() {
-    try {
-        const response = await apiGet('/api/csrf');
-        const tokenInput = document.getElementById('csrfToken');
-        if (tokenInput && response.token) {
-            tokenInput.value = response.token;
-        }
-    } catch (error) {
-        const errorBox = document.getElementById('loginError');
-        if (errorBox) {
-            errorBox.textContent = 'Não foi possível carregar o formulário de login.';
-            errorBox.classList.remove('d-none');
-        }
-    }
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function initPage() {
-    const page = document.body.dataset.page;
-    if (!page) return;
-    if (page === 'home') initHome();
-    if (page === 'articles') initArticles();
-    if (page === 'article') initArticle();
-    if (page === 'login') initLogin();
+// ─── Write helpers ────────────────────────────────────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
 }
-
-window.addEventListener('DOMContentLoaded', initPage);

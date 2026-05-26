@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write — The Journal.</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+
+    <div style="display: flex; flex-direction: column; min-height: 100vh;">
+
+        <nav>
+            <a class="logo" href="index.html">The Journal<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="articles.html">Articles</a></li>
+                <li><a onclick="adminLogout()" style="cursor:pointer;">Sign out</a></li>
+            </ul>
+        </nav>
+
+        <div class="write-page">
+            <div class="write-toolbar">
+                <span>New essay</span>
+                <div class="write-actions">
+                    <button class="btn-outline" onclick="clearDraft()">Clear</button>
+                    <button class="btn-publish" onclick="publishArticle()">Publish</button>
+                </div>
+            </div>
+            <textarea class="write-title-input" id="write-title" placeholder="Title" rows="1"
+                oninput="autoResize(this)"></textarea>
+            <input class="write-tag-input" id="write-tag" type="text"
+                placeholder="Category (e.g. Essay, Reflection, Culture)">
+            <textarea class="write-body-input" id="write-body" placeholder="Begin writing…"></textarea>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script src="../js/app.js"></script>
+    <script>
+        // Guard — redirect if not admin
+        requireAdmin();
+
+        function publishArticle() {
+            const title = document.getElementById('write-title').value.trim();
+            const body = document.getElementById('write-body').value.trim();
+            const tag = document.getElementById('write-tag').value.trim();
+
+            if (!title) { showToast('O ensaio precisa de um título.'); return; }
+            if (!body) { showToast('Escreve algo antes de publicar.'); return; }
+
+            const articles = getArticles();
+            articles.unshift({ title, body, tag, date: new Date().toISOString() });
+            saveArticles(articles);
+
+            clearDraft();
+            showToast('Ensaio publicado com sucesso.');
+            setTimeout(() => window.location.href = 'articles.html', 1200);
+        }
+
+        function clearDraft() {
+            document.getElementById('write-title').value = '';
+            document.getElementById('write-body').value = '';
+            document.getElementById('write-tag').value = '';
+        }
+    </script>
+
+</body>
+
+</html>
