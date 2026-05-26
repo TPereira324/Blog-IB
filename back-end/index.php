@@ -25,10 +25,12 @@ $routes = [
     ],
     'POST' => [
         '/login' => 'login_post',
+        '/logout' => 'logout',
         '/admin/write' => 'admin_write_post',
         '/admin/edit' => 'admin_edit_post',
         '/admin/delete' => 'admin_delete_post',
         '/admin/publish' => 'admin_publish_post',
+        '/newsletter' => 'newsletter_post',
         '/setup' => 'setup_post',
     ],
 ];
@@ -48,7 +50,10 @@ switch ($handler) {
         $articles = articles_latest_published(6);
         render('home', [
             'pageTitle' => 'Início',
-            'articles' => $articles,
+            'articles'  => $articles,
+            'flash'     => isset($_GET['subscribed'])
+                ? ['type' => 'success', 'message' => 'Subscrito. Bem-vindo ao Journal.']
+                : null,
         ]);
         break;
     }
@@ -165,9 +170,21 @@ switch ($handler) {
     case 'admin_list': {
         auth_require_writer();
         $articles = articles_list_all_for_admin();
+        $flashMessages = [
+            'created'   => ['type' => 'success', 'message' => 'Ensaio guardado como rascunho.'],
+            'updated'   => ['type' => 'success', 'message' => 'Ensaio actualizado.'],
+            'published' => ['type' => 'success', 'message' => 'Ensaio publicado.'],
+            'deleted'   => ['type' => 'success', 'message' => 'Ensaio eliminado.'],
+        ];
+        $flashKey = array_key_first(array_filter(
+            $flashMessages,
+            fn($k) => isset($_GET[$k]),
+            ARRAY_FILTER_USE_KEY
+        ));
         render('admin_list', [
             'pageTitle' => 'Painel',
-            'articles' => $articles,
+            'articles'  => $articles,
+            'flash'     => $flashKey ? $flashMessages[$flashKey] : null,
         ]);
         break;
     }
@@ -303,6 +320,10 @@ switch ($handler) {
             articles_delete($id);
         }
         redirect('/admin?deleted=1');
+        break;
+    }
+    case 'newsletter_post': {
+        redirect('/?subscribed=1');
         break;
     }
     case 'setup': {
