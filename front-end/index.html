@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 
 <head>
@@ -23,8 +23,7 @@
         <section class="hero">
             <p class="hero-kicker">Volume I &nbsp;·&nbsp; Est. 2026</p>
             <h1 class="hero-title">Slow thoughts,<br><em>printed with intent.</em></h1>
-            <p class="hero-sub">A quiet corner of the internet for essays that wait, breathe, and arrive only when they
-                are ready.</p>
+            <p class="hero-sub">A quiet corner of the internet for essays that wait, breathe, and arrive only when they are ready.</p>
         </section>
 
         <hr class="divider">
@@ -32,13 +31,10 @@
         <section class="essays-section">
             <div class="essays-header">
                 <h2>Latest essays</h2>
-                <span class="essays-count" id="home-count">0 pieces</span>
+                <span class="essays-count" id="home-count"></span>
             </div>
             <div id="home-articles-list">
-                <div class="empty-state">
-                    <p>The press is warming up.</p>
-                    <p>No articles published yet — check back soon.</p>
-                </div>
+                <div class="loading-state"><p>A carregar…</p></div>
             </div>
         </section>
 
@@ -67,7 +63,7 @@
     <div class="toast" id="toast"></div>
     <script src="js/app.js"></script>
     <script>
-        // Write nav link
+        // Nav write link
         const navWrite = document.getElementById('nav-write');
         if (isAdmin()) {
             navWrite.innerHTML = '<a href="pages/admin-write.html">Write</a>';
@@ -83,15 +79,25 @@
             showToast('Subscrito. Bem-vindo ao Journal.');
         }
 
-        // Render latest 3 articles
-        const articles = getArticles();
+        // Carregar artigos (API primeiro, depois localStorage)
         const countEl = document.getElementById('home-count');
-        const listEl = document.getElementById('home-articles-list');
+        const listEl  = document.getElementById('home-articles-list');
 
-        countEl.textContent = articles.length === 1 ? '1 piece' : `${articles.length} pieces`;
-        if (articles.length > 0) {
-            listEl.innerHTML = articles.slice(0, 3).map((a, i) => articleCardHTML(a, i, 'pages/')).join('');
+        const emptyHTML = `<div class="empty-state">
+            <p>The press is warming up.</p>
+            <p>No articles published yet — check back soon.</p>
+        </div>`;
+
+        function renderArticles(articles, isApi) {
+            countEl.textContent = articles.length === 1 ? '1 piece' : `${articles.length} pieces`;
+            if (articles.length === 0) { listEl.innerHTML = emptyHTML; return; }
+            const base = isApi ? '' : 'pages/';
+            listEl.innerHTML = articles.slice(0, 3).map((a, i) => articleCardHTML(a, i, base)).join('');
         }
+
+        apiGetArticles()
+            .then(articles => renderArticles(articles, true))
+            .catch(() => renderArticles(getArticles(), false));
     </script>
 
 </body>
