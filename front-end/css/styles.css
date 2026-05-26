@@ -1229,6 +1229,35 @@ footer span {
   transition: opacity 0.2s;
 }
 .sidebar-popular li a:hover { opacity: 0.72; }
+
+/* ── Social buttons ── */
+.sidebar-socials {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border: 0.5px solid var(--border-strong);
+  text-decoration: none;
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.5);
+}
+.social-btn:hover {
+  background: var(--green-deep);
+  color: #f4f8f4;
+  border-color: var(--green-deep);
+}
 .pop-num {
   font-family: var(--serif);
   font-size: 1.5rem;
