@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — The Journal.</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+
+    <div style="display: flex; flex-direction: column; min-height: 100vh;">
+
+        <nav>
+            <a class="logo" href="../index.html">The Journal<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="articles.html">Articles</a></li>
+                <li><a href="admin-login.html">Write</a></li>
+            </ul>
+        </nav>
+
+        <div class="auth-page">
+            <div class="auth-box">
+                <h1>Welcome back</h1>
+                <p class="auth-sub">Admin access — to write &amp; publish.</p>
+                <input class="auth-field" type="email" placeholder="Email" id="auth-email">
+                <input class="auth-field" type="password" placeholder="Password" id="auth-pass">
+                <button class="btn-auth" onclick="login()">Sign In</button>
+                <p class="auth-signup">No account? <a href="#" onclick="showToast('Registo não disponível nesta versão.')">Sign up</a></p>
+                <a class="back-to-journal" href="../index.html">← Back to journal</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script src="../js/app.js"></script>
+    <script>
+        if (isAdmin()) window.location.href = 'admin-write.html';
+
+        function login() {
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value;
+
+            if (email === DEMO_EMAIL && pass === DEMO_PASS) {
+                localStorage.setItem(AUTH_KEY, 'true');
+                window.location.href = 'admin-write.html';
+            } else {
+                showToast('Credenciais incorretas.');
+            }
+        }
+
+        document.getElementById('auth-pass').addEventListener('keydown', e => {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+
+</body>
+
+</html>
