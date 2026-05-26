@@ -7,7 +7,7 @@
             <input type="hidden" name="_csrf" value="<?= e($csrf) ?>">
             <input class="auth-field" type="text"     name="setup_key" placeholder="Setup key"       required autofocus>
             <input class="auth-field" type="email"    name="email"     placeholder="Email"            required>
-            <input class="auth-field" type="password" name="password"  placeholder="Password (mín. 12 caracteres)" required>
+            <input class="auth-field" type="password" name="password"  placeholder="Password (mín. 6 caracteres)" required>
             <button class="btn-auth" type="submit">Criar conta</button>
         </form>
 

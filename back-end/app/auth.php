@@ -26,7 +26,7 @@ function auth_login_writer(string $email, string $password): array
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         return ['ok' => false, 'message' => 'Email inválido.'];
     }
-    if (mb_strlen($password) < 8) {
+    if (mb_strlen($password) < 6) {
         return ['ok' => false, 'message' => 'Password inválida.'];
     }
 
@@ -85,14 +85,19 @@ function setup_create_first_writer(string $setupKey, string $email, string $pass
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         return ['ok' => false, 'message' => 'Email inválido.'];
     }
-    if (mb_strlen($password) < 12) {
-        return ['ok' => false, 'message' => 'Password fraca. Usa pelo menos 12 caracteres.'];
+    if (mb_strlen($password) < 6) {
+        return ['ok' => false, 'message' => 'Password fraca. Usa pelo menos 6 caracteres.'];
     }
 
     $pdo = db();
     $count = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
     if ($count > 0) {
-        return ['ok' => false, 'message' => 'Já existe um utilizador. Desativa o setup.'];
+        $stmt = $pdo->prepare('UPDATE users SET email = :email, password_hash = :hash WHERE id = (SELECT id FROM users ORDER BY id LIMIT 1)');
+        $stmt->execute([
+            ':email' => mb_strtolower(trim($email)),
+            ':hash'  => password_hash($password, PASSWORD_DEFAULT),
+        ]);
+        return ['ok' => true, 'message' => 'Conta actualizada.'];
     }
 
     $stmt = $pdo->prepare('INSERT INTO users (email, password_hash, role, created_at) VALUES (:email, :hash, :role, :ts)');
