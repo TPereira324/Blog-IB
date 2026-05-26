@@ -25,7 +25,7 @@ function requireAdmin() {
 
 function adminLogout() {
   localStorage.removeItem(AUTH_KEY);
-  window.location.href = 'index.html';
+  window.location.href = '../index.html';
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -45,9 +45,9 @@ function excerpt(text, len = 160) {
   return plain.length > len ? plain.slice(0, len).trimEnd() + '…' : plain;
 }
 
-function articleCardHTML(art, i) {
+function articleCardHTML(art, i, base = '') {
   return `
-    <div class="article-card" onclick="window.location.href='article.html?id=${i}'">
+    <div class="article-card" onclick="window.location.href='${base}article.html?id=${i}'">
       <div class="article-meta">
         <span class="article-date">${formatDate(art.date)}</span>
         ${art.tag ? `<span class="article-tag">${art.tag}</span>` : ''}
