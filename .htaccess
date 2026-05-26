@@ -1,0 +1,13 @@
+Options -MultiViews -Indexes
+RewriteEngine On
+
+# Se estiver numa subpasta (ex: /Blog-IB), define aqui:
+# RewriteBase /Blog-IB/
+# Caso contrário, deixa sem RewriteBase (virtual host apontado para esta pasta)
+
+# Serve ficheiros estáticos directamente
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Tudo o resto vai para o router PHP
+RewriteRule ^(.*)$ back-end/index.php [L,QSA]
