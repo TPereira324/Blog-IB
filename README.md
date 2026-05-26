@@ -25,5 +25,5 @@ O sistema permite criar, visualizar e organizar publicações de maneira intuiti
 - MySQL
 
 ## Equipa
--Feliciano Barata
--Taha-Wur Pereira
+- Feliciano Barata
+- Taha-Wur Pereira
