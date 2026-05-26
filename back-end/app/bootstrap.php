@@ -44,5 +44,10 @@ if ($env === 'dev') {
 session_init();
 send_security_headers();
 
-db_ensure_schema();
+try {
+    db_ensure_schema();
+} catch (Throwable $e) {
+    // DB não configurada ou indisponível — regista o erro mas não crasha
+    error_log('[Blog-IB] DB error: ' . $e->getMessage());
+}
 
