@@ -1,78 +1,110 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Article — The Journal.</title>
-  <link rel="stylesheet" href="../css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article — The Journal.</title>
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 
 <body>
 
-  <div style="display: flex; flex-direction: column; min-height: 100vh;">
+    <div style="display: flex; flex-direction: column; min-height: 100vh;">
 
-    <nav>
-      <a class="logo" href="../index.html">The Journal<span>.</span></a>
-      <ul class="nav-links">
-        <li><a href="articles.html">Articles</a></li>
-        <li id="nav-write"></li>
-      </ul>
-    </nav>
+        <nav>
+            <a class="logo" href="../index.html">The Journal<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="articles.html">Articles</a></li>
+                <li id="nav-write"></li>
+            </ul>
+        </nav>
 
-    <div class="article-page">
-      <a class="back-link" href="articles.html">← Back to essays</a>
-      <p class="article-page-kicker" id="read-tag"></p>
-      <h1 id="read-title">Loading…</h1>
-      <div class="article-page-meta">
-        <span id="read-date"></span>
-        <span id="read-time"></span>
-      </div>
-      <div class="article-body" id="read-body"></div>
+        <div class="article-page">
+            <a class="back-link" href="articles.html">← Back to essays</a>
+            <p class="article-page-kicker" id="read-tag"></p>
+            <h1 id="read-title">A carregar…</h1>
+            <div class="article-page-meta" id="read-meta" style="display:none;">
+                <span id="read-date"></span>
+                <span id="read-time"></span>
+            </div>
+            <div class="article-body" id="read-body"></div>
+        </div>
+
+        <footer>
+            <p>The Journal — published with care.</p>
+            <span>© 2026</span>
+        </footer>
+
     </div>
 
-    <footer>
-      <p>The Journal — published with care.</p>
-      <span>© 2026</span>
-    </footer>
+    <script src="../js/app.js"></script>
+    <script>
+        // Nav write link
+        const navWrite = document.getElementById('nav-write');
+        if (isAdmin()) {
+            navWrite.innerHTML = '<a href="admin-write.html">Write</a>';
+        } else {
+            navWrite.innerHTML = '<a href="admin-login.html">Write</a>';
+        }
 
-  </div>
+        const params = new URLSearchParams(window.location.search);
+        const idParam = params.get('id');
 
-  <script src="../js/app.js"></script>
-  <script>
-    // Write nav link
-    const navWrite = document.getElementById('nav-write');
-    if (isAdmin()) {
-      navWrite.innerHTML = '<a href="admin-write.html">Write</a>';
-    } else {
-      navWrite.innerHTML = '<a href="admin-login.html">Write</a>';
-    }
+        function renderApiArticle(art) {
+            document.title = `${art.title} — The Journal.`;
+            document.getElementById('read-title').textContent = art.title;
+            document.getElementById('read-date').textContent = formatDate(art.published_at);
+            document.getElementById('read-time').textContent = readTime(art.content || '');
+            document.getElementById('read-meta').style.display = 'flex';
 
-    // Load article
-    const params = new URLSearchParams(window.location.search);
-    const index = parseInt(params.get('id'), 10);
-    const articles = getArticles();
-    const art = articles[index];
+            // Converte parágrafos duplos em <p>
+            const body = (art.content || '')
+                .split(/\n\n+/)
+                .map(p => {
+                    p = p.trim();
+                    if (!p) return '';
+                    return (p.startsWith('"') || p.startsWith('“'))
+                        ? `<blockquote>${p}</blockquote>`
+                        : `<p>${p}</p>`;
+                })
+                .join('');
+            document.getElementById('read-body').innerHTML = body;
+        }
 
-    if (!art) {
-      document.getElementById('read-title').textContent = 'Article not found.';
-    } else {
-      document.title = `${art.title} — The Journal.`;
-      document.getElementById('read-tag').textContent = art.tag || '';
-      document.getElementById('read-title').textContent = art.title;
-      document.getElementById('read-date').textContent = formatDate(art.date);
-      document.getElementById('read-time').textContent = readTime(art.body);
+        function renderLocalArticle(art) {
+            document.title = `${art.title} — The Journal.`;
+            document.getElementById('read-tag').textContent = art.tag || '';
+            document.getElementById('read-title').textContent = art.title;
+            document.getElementById('read-date').textContent = formatDate(art.date);
+            document.getElementById('read-time').textContent = readTime(art.body);
+            document.getElementById('read-meta').style.display = 'flex';
 
-      document.getElementById('read-body').innerHTML = art.body
-        .split('\n\n')
-        .map(para =>
-          para.startsWith('"') || para.startsWith('\u201c')
-            ? `<blockquote>${para}</blockquote>`
-            : `<p>${para}</p>`
-        )
-        .join('');
-    }
-  </script>
+            document.getElementById('read-body').innerHTML = art.body
+                .split('\n\n')
+                .map(p => (p.startsWith('"') || p.startsWith('“'))
+                    ? `<blockquote>${p}</blockquote>`
+                    : `<p>${p}</p>`)
+                .join('');
+        }
+
+        // Tenta API primeiro, depois localStorage
+        const numericId = parseInt(idParam, 10);
+
+        if (!isNaN(numericId) && API_BASE !== undefined) {
+            apiGetArticle(numericId)
+                .then(renderApiArticle)
+                .catch(() => {
+                    const art = getArticles()[numericId];
+                    if (art) renderLocalArticle(art);
+                    else document.getElementById('read-title').textContent = 'Artigo não encontrado.';
+                });
+        } else {
+            const art = getArticles()[numericId];
+            if (art) renderLocalArticle(art);
+            else document.getElementById('read-title').textContent = 'Artigo não encontrado.';
+        }
+    </script>
 
 </body>
 
