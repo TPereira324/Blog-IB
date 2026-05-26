@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Journal.</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
@@ -15,8 +15,8 @@
         <nav>
             <a class="logo" href="index.html">The Journal<span>.</span></a>
             <ul class="nav-links">
-                <li><a href="articles.html">Articles</a></li>
-                <li id="nav-admin"></li>
+                <li><a href="pages/articles.html">Articles</a></li>
+                <li id="nav-write"></li>
             </ul>
         </nav>
 
@@ -65,14 +65,14 @@
     </div>
 
     <div class="toast" id="toast"></div>
-    <script src="../js/app.js"></script>
+    <script src="js/app.js"></script>
     <script>
-        // Admin nav link
-        const navAdmin = document.getElementById('nav-admin');
+        // Write nav link
+        const navWrite = document.getElementById('nav-write');
         if (isAdmin()) {
-            navAdmin.innerHTML = '<a href="admin-write.html">Write</a>';
+            navWrite.innerHTML = '<a href="pages/admin-write.html">Write</a>';
         } else {
-            navAdmin.innerHTML = '<a href="admin-login.html">Write</a>';
+            navWrite.innerHTML = '<a href="pages/admin-login.html">Write</a>';
         }
 
         // Newsletter
@@ -90,7 +90,7 @@
 
         countEl.textContent = articles.length === 1 ? '1 piece' : `${articles.length} pieces`;
         if (articles.length > 0) {
-            listEl.innerHTML = articles.slice(0, 3).map((a, i) => articleCardHTML(a, i)).join('');
+            listEl.innerHTML = articles.slice(0, 3).map((a, i) => articleCardHTML(a, i, 'pages/')).join('');
         }
     </script>
 
