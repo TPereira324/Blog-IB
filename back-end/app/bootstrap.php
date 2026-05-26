@@ -1,6 +1,28 @@
 <?php
 declare(strict_types=1);
 
+// Load .env from project root if it exists
+(function () {
+    $envFile = dirname(dirname(__DIR__)) . '/.env';
+    if (!is_file($envFile)) {
+        return;
+    }
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#') || !str_contains($line, '=')) {
+            continue;
+        }
+        [$name, $value] = explode('=', $line, 2);
+        $name  = trim($name);
+        $value = trim($value, " \t\"'");
+        if ($name !== '' && getenv($name) === false) {
+            putenv("$name=$value");
+            $_ENV[$name] = $value;
+        }
+    }
+})();
+
 require __DIR__ . '/config.php';
 require __DIR__ . '/db.php';
 require __DIR__ . '/security.php';
