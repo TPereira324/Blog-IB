@@ -182,6 +182,17 @@ nav {
   color: var(--text-hint);
 }
 
+/* Loading state */
+.loading-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-hint);
+}
+
 /* Empty state */
 .empty-state {
   border: 1px dashed var(--border-strong);
