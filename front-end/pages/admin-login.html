@@ -27,7 +27,7 @@
                 <input class="auth-field" type="email" placeholder="Email" id="auth-email">
                 <input class="auth-field" type="password" placeholder="Password" id="auth-pass">
                 <button class="btn-auth" onclick="login()">Sign In</button>
-                <p class="auth-signup">No account? <a href="#" onclick="showToast('Registo não disponível nesta versão.')">Sign up</a></p>
+                <p class="auth-signup">No account? <a href="#" onclick="showToast('Registo não disponível.')">Sign up</a></p>
                 <a class="back-to-journal" href="../index.html">← Back to journal</a>
             </div>
         </div>
@@ -37,11 +37,17 @@
     <div class="toast" id="toast"></div>
     <script src="../js/app.js"></script>
     <script>
+        // Se já está autenticado via localStorage, vai para escrita
         if (isAdmin()) window.location.href = 'admin-write.html';
+
+        // Tenta redirecionar para o backend PHP se estiver disponível
+        fetch(API_BASE + '/api/csrf')
+            .then(r => { if (r.ok) window.location.href = API_BASE + '/login'; })
+            .catch(() => { /* backend não disponível, usa localStorage */ });
 
         function login() {
             const email = document.getElementById('auth-email').value.trim();
-            const pass = document.getElementById('auth-pass').value;
+            const pass  = document.getElementById('auth-pass').value;
 
             if (email === DEMO_EMAIL && pass === DEMO_PASS) {
                 localStorage.setItem(AUTH_KEY, 'true');
