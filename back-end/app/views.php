@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 function render(string $view, array $data = []): void
 {
-    $viewsDir = dirname(__DIR__) . '/../../front-end/views';
+    $viewsDir = dirname(dirname(__DIR__)) . '/front-end/views';
     $viewFile = $viewsDir . '/' . $view . '.php';
     if (!is_file($viewFile)) {
         throw new RuntimeException('View não encontrada: ' . $view);

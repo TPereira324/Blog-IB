@@ -36,8 +36,9 @@ function send_security_headers(): void
         "form-action 'self'",
         "frame-ancestors 'none'",
         "img-src 'self' data:",
-        "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'",
-        "script-src 'self' https://cdn.jsdelivr.net",
+        "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net 'unsafe-inline'",
+        "font-src 'self' https://fonts.gstatic.com",
+        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'",
         "connect-src 'self'",
     ]);
     header('Content-Security-Policy: ' . $csp);
