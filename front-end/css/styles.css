@@ -963,10 +963,19 @@ footer span {
 .quick-bar-item:last-child { border-right: none; }
 .quick-bar-item:hover { background: var(--bg-hover); }
 .quick-bar-thumb {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
-  border-radius: 2px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quick-bar-thumb--ig {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+.quick-bar-thumb--tt {
+  background: #010101;
 }
 .quick-bar-text h4 {
   font-family: var(--serif);
